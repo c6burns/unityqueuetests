@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>BufferTest-20190819-094402</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.11.5, OS=debian 9
+Intel Core i7-6600U CPU 2.60GHz (Skylake), 1 CPU, 4 logical and 2 physical cores
+.NET Core SDK=3.0.100-preview7-012821
+  [Host]     : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), 64bit RyuJIT
+  DefaultJob : .NET Core 2.2.5 (CoreCLR 4.6.27617.05, CoreFX 4.6.27618.01), 64bit RyuJIT
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Median</th>
+</tr>
+</thead><tbody><tr><td>RB</td><td>4,554.6 ms</td><td>60.00 ms</td><td>53.19 ms</td><td>4,572.2 ms</td>
+</tr><tr><td>SPSCQ</td><td>3,805.4 ms</td><td>330.87 ms</td><td>975.57 ms</td><td>3,691.3 ms</td>
+</tr><tr><td>CCQ</td><td>881.2 ms</td><td>20.70 ms</td><td>58.38 ms</td><td>863.5 ms</td>
+</tr></tbody></table>
+</body>
+</html>

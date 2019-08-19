@@ -1,16 +1,19 @@
 ﻿using System.Diagnostics;
 using System.Threading;
 using System.Collections.Concurrent;
-using UnityEngine;
-using Debug = UnityEngine.Debug;
 using Random = System.Random;
+using System;
 
 namespace DisruptorUnity3d
 {
+#if UNITY_EDITOR || UNITY_STANDALONE
     public class Test : MonoBehaviour
+#else
+    public class Test
+#endif
     {
         const int QUEUESIZE = 10000;
-        const ulong Count = 5000000;
+        const ulong Count = 50000000;
 
         static readonly Random Rng = new Random();
         static readonly RingBuffer<ulong> _rbQueue = new RingBuffer<ulong>(QUEUESIZE);
@@ -22,8 +25,6 @@ namespace DisruptorUnity3d
         
         private Thread _consumerThread;
         private Thread _producerThread;
-
-        private int numberToEnqueue;
 
         void Start()
         {
@@ -45,6 +46,7 @@ namespace DisruptorUnity3d
             }
         }
 
+#if UNITY_EDITOR || UNITY_STANDALONE
         void OnGUI()
         {
             if (GUILayout.Button("Test RingBuffer"))
@@ -67,61 +69,67 @@ namespace DisruptorUnity3d
                 StartTestConcurrentQueue();
             }
         }
+#endif
 
-        void StartTestRingBuffer()
+        public void StartTestRingBuffer()
         {
             _consumerThread = new Thread(() =>
             {
-                Debug.Log("RingBuffer consumer started");
+                Console.WriteLine("RingBuffer consumer started");
                 Stopwatch sw = Stopwatch.StartNew();
                 for (ulong i = 0; i < Count;)
                 {
                     if (_rbQueue.TryDequeue(out ulong val))
                     {
-                        if (val != i) Debug.LogError("wrong value " + val + " ,correct: " + i);
+                        if (val != i) Console.WriteLine("wrong value " + val + " ,correct: " + i);
                         i++;
                     }
                 }
-                Debug.LogFormat("RingBuffer consumer done {0}", sw.Elapsed);
+                Console.WriteLine("RingBuffer consumer done {0}", sw.Elapsed);
             });
 
             _producerThread = new Thread(() =>
             {
-                Debug.Log("RingBuffer producer started");
+                Console.WriteLine("RingBuffer producer started");
                 Stopwatch sw = Stopwatch.StartNew();
                 for (ulong i = 0; i < Count; i++)
                 {
                     _rbQueue.Enqueue(i);
                 }
-                Debug.LogFormat("RingBuffer producer done {0}", sw.Elapsed);
+                Console.WriteLine("RingBuffer producer done {0}", sw.Elapsed);
             });
 
             _consumerThread.Start();
             _producerThread.Start();
+
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _consumerThread.Join();
+            _producerThread.Join();
+#endif
         }
 
-        void StartTestSPSCQueue()
+        public void StartTestSPSCQueue()
         {
             SpinWait spinner = new SpinWait();
             _consumerThread = new Thread(() =>
             {
-                Debug.Log("SPSCQueue consumer started");
+                Console.WriteLine("SPSCQueue consumer started");
                 Stopwatch sw = Stopwatch.StartNew();
                 for (ulong i = 0; i < Count;)
                 {
                     ulong val;
                     while (!_spscQueue.TryDequeue(out val)) { spinner.SpinOnce(); }
 
-                    if (val != i) Debug.LogError("wrong value " + val + " ,correct: " + i);
+                    if (val != i) Console.WriteLine("wrong value " + val + " ,correct: " + i);
                     i++;
 
                 }
-                Debug.LogFormat("SPSCQueue consumer done {0}", sw.Elapsed);
+                Console.WriteLine("SPSCQueue consumer done {0}", sw.Elapsed);
             });
 
             _producerThread = new Thread(() =>
             {
-                Debug.Log("SPSCQueue producer started");
+                Console.WriteLine("SPSCQueue producer started");
                 Stopwatch sw = Stopwatch.StartNew();
                 for (ulong i = 0; i < Count;)
                 {
@@ -129,35 +137,40 @@ namespace DisruptorUnity3d
 
                     i++;
                 }
-                Debug.LogFormat("SPSCQueue producer done {0}", sw.Elapsed);
+                Console.WriteLine("SPSCQueue producer done {0}", sw.Elapsed);
             });
 
             _consumerThread.Start();
             _producerThread.Start();
+
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _consumerThread.Join();
+            _producerThread.Join();
+#endif
         }
 
-        void StartTestSPSCQueueElegant()
+        public void StartTestSPSCQueueElegant()
         {
             SpinWait spinner = new SpinWait();
             _consumerThread = new Thread(() =>
             {
-                Debug.Log("SPSCQueueElegant consumer started");
+                Console.WriteLine("SPSCQueueElegant consumer started");
                 Stopwatch sw = Stopwatch.StartNew();
                 for (ulong i = 0; i < Count;)
                 {
                     ulong val;
                     while (!_spscQueue.TryDequeue(out val)) { spinner.SpinOnce(); }
 
-                    if (val != i) Debug.LogError("wrong value " + val + " ,correct: " + i);
+                    if (val != i) Console.WriteLine("wrong value " + val + " ,correct: " + i);
                     i++;
 
                 }
-                Debug.LogFormat("SPSCQueueElegant consumer done {0}", sw.Elapsed);
+                Console.WriteLine("SPSCQueueElegant consumer done {0}", sw.Elapsed);
             });
 
             _producerThread = new Thread(() =>
             {
-                Debug.Log("SPSCQueueElegant producer started");
+                Console.WriteLine("SPSCQueueElegant producer started");
                 Stopwatch sw = Stopwatch.StartNew();
                 for (ulong i = 0; i < Count;)
                 {
@@ -165,43 +178,53 @@ namespace DisruptorUnity3d
 
                     i++;
                 }
-                Debug.LogFormat("SPSCQueueElegant producer done {0}", sw.Elapsed);
+                Console.WriteLine("SPSCQueueElegant producer done {0}", sw.Elapsed);
             });
 
             _consumerThread.Start();
             _producerThread.Start();
+
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _consumerThread.Join();
+            _producerThread.Join();
+#endif
         }
 
-        void StartTestConcurrentQueue()
+        public void StartTestConcurrentQueue()
         {
             _consumerThread = new Thread(() =>
             {
-                Debug.Log("ConcurrentQueue consumer started");
+                Console.WriteLine("ConcurrentQueue consumer started");
                 Stopwatch sw = Stopwatch.StartNew();
                 for (ulong i = 0; i < Count;)
                 {
                     if (_conQueue.TryDequeue(out ulong val))
                     {
-                        if (val != i) Debug.LogError("wrong value " + val + " ,correct: " + i);
+                        if (val != i) Console.WriteLine("wrong value " + val + " ,correct: " + i);
                         i++;
                     }
                 }
-                Debug.LogFormat("ConcurrentQueue consumer done {0}", sw.Elapsed);
+                Console.WriteLine("ConcurrentQueue consumer done {0}", sw.Elapsed);
             });
 
             _producerThread = new Thread(() =>
             {
-                Debug.Log("ConcurrentQueue producer started");
+                Console.WriteLine("ConcurrentQueue producer started");
                 Stopwatch sw = Stopwatch.StartNew();
                 for (ulong i = 0; i < Count; i++)
                 {
                     _conQueue.Enqueue(i);
                 }
-                Debug.LogFormat("ConcurrentQueue producer done {0}", sw.Elapsed);
+                Console.WriteLine("ConcurrentQueue producer done {0}", sw.Elapsed);
             });
 
             _consumerThread.Start();
             _producerThread.Start();
+
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _consumerThread.Join();
+            _producerThread.Join();
+#endif
         }
     }
 }
