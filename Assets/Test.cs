@@ -12,8 +12,8 @@ namespace DisruptorUnity3d
     public class Test
 #endif
     {
-        const int QUEUESIZE = 10000;
-        const ulong Count = 50000000;
+        const int QUEUESIZE = 100000000;
+        const ulong Count = 100000000;
 
         static readonly Random Rng = new Random();
         static readonly RingBuffer<ulong> _rbQueue = new RingBuffer<ulong>(QUEUESIZE);

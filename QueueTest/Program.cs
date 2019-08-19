@@ -9,12 +9,11 @@ using BenchmarkDotNet.Running;
 
 public class BufferTest
 {
-    const int QUEUESIZE = 10000;
-    const ulong Count = 50000000;
+    const int QUEUESIZE = 1000000;
+    const ulong Count = 1000000;
 
     static readonly Random Rng = new Random();
     static readonly RingBuffer<ulong> _rbQueue = new RingBuffer<ulong>(QUEUESIZE);
-    static readonly SPSCQueue _spscQueue = new SPSCQueue(QUEUESIZE);
     static readonly SPSCQueueElegant _spscQueueElegant = new SPSCQueueElegant(QUEUESIZE);
     static readonly ConcurrentQueue<ulong> _conQueue = new ConcurrentQueue<ulong>();
 
@@ -76,7 +75,7 @@ public class BufferTest
             for (ulong i = 0; i < Count;)
             {
                 ulong val;
-                while (!_spscQueue.TryDequeue(out val)) { spinner.SpinOnce(); }
+                while (!_spscQueueElegant.TryDequeue(out val)) { spinner.SpinOnce(); }
 
                 if (val != i) Console.WriteLine("wrong value " + val + " ,correct: " + i);
                 i++;
@@ -91,7 +90,7 @@ public class BufferTest
             Stopwatch sw = Stopwatch.StartNew();
             for (ulong i = 0; i < Count;)
             {
-                while (!_spscQueue.TryEnqueue(i)) { spinner.SpinOnce(); }
+                while (!_spscQueueElegant.TryEnqueue(i)) { spinner.SpinOnce(); }
 
                 i++;
             }
@@ -101,10 +100,8 @@ public class BufferTest
         _consumerThread.Start();
         _producerThread.Start();
 
-#if !UNITY_EDITOR && !UNITY_STANDALONE
         _consumerThread.Join();
         _producerThread.Join();
-#endif
     }
 
     [Benchmark]
@@ -139,10 +136,8 @@ public class BufferTest
         _consumerThread.Start();
         _producerThread.Start();
 
-#if !UNITY_EDITOR && !UNITY_STANDALONE
         _consumerThread.Join();
         _producerThread.Join();
-#endif
     }
 
     public class Program
